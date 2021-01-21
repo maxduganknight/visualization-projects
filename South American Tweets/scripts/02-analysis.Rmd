@@ -1,0 +1,74 @@
+---
+title: "Parse Data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library("rtweet")
+library("stringr")
+library("tidyverse")
+library("jsonlite")
+library("rjson")
+library("maps")
+```
+
+# Parse data and explore hashtags
+
+__I collected 141,905 tweets.__
+
+__The most popular hashtags were the following:__
+
+* __#117Newells__
+* __#justiceapormariferrer__
+* __#Elections2020__
+* __#tbt__
+* __#Dgfazobaile__
+* __#Elecciones2020__
+
+```{r parse-tweets}
+# Parsing and combining json files in which tweets were saved
+tweets_combined <- rbind(parse_stream("data/s_america_tweets.json"), parse_stream("data/s_america_tweets_2.json"), 
+                         parse_stream("data/s_america_tweets_3.json"), parse_stream("data/s_america_tweets_4.json"),
+                         parse_stream("data/s_america_tweets_5.json"), parse_stream("data/s_america_tweets_6.json"),
+                         parse_stream("data/s_america_tweets_7.json"))
+
+# Adding latitude, longitude cols, dropping columns, and removing any duplicate rows
+tweets_clean <- lat_lng(tweets_combined)
+tweets_clean <- select(tweets_clean, status_id, lat, lng, text, lang, country, country_code)
+tweets_clean <- tweets_clean[!duplicated(tweets_clean$status_id),]
+
+# Total number of tweets
+length(tweets_clean$status_id)
+
+# Exploring hashtags
+ht <- str_extract_all(tweets_clean$text, "#[A-Za-z0-9_]+")
+ht <- unlist(ht)
+```
+
+# Language data
+
+__Most popular languages:__
+
+* __Portuguese__
+* __Spanish__
+* __Undefied__
+* __English__
+* __Italian__
+* __Tagalog__
+
+__The tweets contain 37 unique languages.__
+
+```{r language-data}
+# Exploring top languages
+#head(sort(table(tweets_clean$lang), decreasing = TRUE))
+
+# Total number of unique languages
+length(unique(tweets_clean$lang))
+
+# "und" looks like it could be short for undefined
+# These tweets look difficult to fit into a language category
+tweets_clean %>%
+  filter(lang == 'und') %>%
+  select(text) %>%
+  head()
+```
