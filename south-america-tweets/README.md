@@ -4,10 +4,12 @@ For this project, I use Twitter data to analyze language use in Tweets in South 
 
 This repository is organized as follows.
 
+```
 proj/
 ├── scipts/
 ├── graphics/
 └── data/
+```
 
 ## Highlights
 
